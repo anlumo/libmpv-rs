@@ -34,6 +34,7 @@ pub enum Error {
     InvalidUtf8,
     Null,
     Raw(crate::MpvError),
+    RawWithString((crate::MpvError, &'static str)),
 }
 
 impl fmt::Display for Error {

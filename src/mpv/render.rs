@@ -395,7 +395,7 @@ impl RenderContext {
         ret
     }
 
-    pub fn render_sw(&self, size: (i32, i32), format: &str, stride: usize, array_to_render: &mut [u8]) -> Result<()> {
+    pub fn render_sw(&self, size: (i32, i32), format: &CStr, stride: usize, array_to_render: &mut [u8]) -> Result<()> {
         let mut raw_params: Vec<mpv_render_param> = Vec::with_capacity(3);
         let mut raw_ptrs: HashMap<*const c_void, DeleterFn> = HashMap::new();
 
@@ -404,7 +404,7 @@ impl RenderContext {
         raw_ptrs.insert(raw_param.data, free_void_data::<usize>);
         raw_params.push(raw_param);
 
-        let raw_param: mpv_render_param = RenderParam::<()>::SoftwareFormat(format.as_ptr()).into();
+        let raw_param: mpv_render_param = RenderParam::<()>::SoftwareFormat(format.as_ptr() as *const u8).into();
         // No need to free as we only have a reference to it
         raw_params.push(raw_param);
 

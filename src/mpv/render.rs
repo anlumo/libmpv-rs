@@ -395,7 +395,16 @@ impl RenderContext {
         ret
     }
 
-    pub fn render_sw(&self, size: (i32, i32), format: &CStr, stride: usize, array_to_render: &mut [u8]) -> Result<()> {
+    /// Software render video directly to texture buffer
+    /// 
+    /// # Arguments
+    ///
+    /// * `width` - The width of the framebuffer in pixels.
+    /// * `height` - The height of the framebuffer in pixels.
+    /// * `format` - Format to render into the texture buffer (Example: `&CStr::from_bytes_with_nul(b"rgba\0").unwrap()`).
+    /// * `stride` - How many bytes in each row of pixels. (Example: `width * 4`).
+    /// * `texture_buffer` - The texture buffer to render into.
+    pub fn render_sw(&self, width: i32, height: i32, format: &CStr, stride: usize, texture_buffer: &mut [u8]) -> Result<()> {
         let mut raw_params: Vec<mpv_render_param> = Vec::with_capacity(3);
         let mut raw_ptrs: HashMap<*const c_void, DeleterFn> = HashMap::new();
 
@@ -408,11 +417,11 @@ impl RenderContext {
         // No need to free as we only have a reference to it
         raw_params.push(raw_param);
 
-        let raw_param: mpv_render_param = RenderParam::<()>::SoftwareSize(size).into();
+        let raw_param: mpv_render_param = RenderParam::<()>::SoftwareSize((width, height)).into();
         raw_ptrs.insert(raw_param.data, free_void_data::<[i32; 2]>);
         raw_params.push(raw_param);
 
-        let raw_param: mpv_render_param = RenderParam::<()>::SoftwarePointer(array_to_render.as_mut_ptr()).into();
+        let raw_param: mpv_render_param = RenderParam::<()>::SoftwarePointer(texture_buffer.as_mut_ptr()).into();
         // No need to free as we only have a reference to it
         raw_params.push(raw_param);
 

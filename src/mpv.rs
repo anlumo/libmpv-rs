@@ -55,7 +55,7 @@ fn mpv_err<T>(ret: T, err: ctype::c_int) -> Result<T> {
     if err == 0 {
         Ok(ret)
     } else {
-        Err(Error::Raw(err))
+        Err(Error::RawWithString((err, libmpv_sys::mpv_error_str(err))))
     }
 }
 
@@ -509,7 +509,6 @@ impl Mpv {
             cmd.push(' ');
             cmd.push_str(elem);
         }
-
         let raw = CString::new(cmd)?;
         mpv_err((), unsafe {
             libmpv_sys::mpv_command_string(self.ctx.as_ptr(), raw.as_ptr())

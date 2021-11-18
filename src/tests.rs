@@ -87,8 +87,14 @@ macro_rules! assert_event_occurs {
 
 #[test]
 fn events() {
-    let mpv = Mpv::new().unwrap();
-    let mut ev_ctx = mpv.create_event_context();
+    let mut mpv = Mpv::new().unwrap();
+
+    mpv.set_property("vo", "null").unwrap();
+    mpv.set_property("ytdl", false).unwrap();
+    mpv.set_property("volume", 0).unwrap();
+
+
+    let ev_ctx = mpv.event_context_mut();
     ev_ctx.disable_deprecated_events().unwrap();
 
     ev_ctx.observe_property("volume", Format::Int64, 0).unwrap();
@@ -96,8 +102,8 @@ fn events() {
         .observe_property("media-title", Format::String, 1)
         .unwrap();
 
-    mpv.set_property("vo", "null").unwrap();
-    mpv.set_property("ytdl", false).unwrap();
+
+    let ev_ctx = mpv.event_context_mut();
 
     assert_event_occurs!(
         ev_ctx,
@@ -109,7 +115,6 @@ fn events() {
         })
     );
 
-    mpv.set_property("volume", 0).unwrap();
     assert_event_occurs!(
         ev_ctx,
         10.,
@@ -127,6 +132,9 @@ fn events() {
         None,
     )])
     .unwrap();
+
+    let ev_ctx = mpv.event_context_mut();
+
     assert_event_occurs!(ev_ctx, 10., Ok(Event::StartFile));
     assert_event_occurs!(
         ev_ctx,
@@ -146,6 +154,9 @@ fn events() {
         None,
     )])
     .unwrap();
+
+    let ev_ctx = mpv.event_context_mut();
+
     assert_event_occurs!(ev_ctx, 10., Ok(Event::StartFile));
     assert_event_occurs!(
         ev_ctx,
